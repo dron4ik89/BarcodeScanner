@@ -77,10 +77,8 @@ class MainActivity : AppCompatActivity() {
         //camera_view.startScan()
     }
 
-    override fun onPause() {
-
+    override fun onDestroy() {
         camera_view.stopPreview()
-
-        super.onPause()
+        super.onDestroy()
     }
 }
