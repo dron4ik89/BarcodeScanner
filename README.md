@@ -77,3 +77,16 @@ override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<Str
   setFormats(formats: Array<BarcodeFormat>) // will scan all given formats
 ```
 
+### Focus
+```
+startFocus() // Same as startFocus(1000L)
+startFocus(delay: Long) // Auto focus
+stopFocus() // Stop focus
+```
+
+### Flash light
+```
+lightOn() // setLight(FlashMode.ON)
+lightOff() // setLight(FlashMode.OFF)
+setLight(mode: FlashMode) // FlashMode.ON == lightOn() || FlashMode.OFF == lightOff()
+```
