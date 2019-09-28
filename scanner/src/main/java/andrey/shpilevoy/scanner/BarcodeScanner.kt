@@ -76,6 +76,31 @@ class BarcodeScanner @JvmOverloads constructor(context: Context, attrs: Attribut
         CameraScanAnalysis.bcFormats.addAll(formats)
     }
 
+    fun startFocus(){
+        super.startFocusBase()
+    }
+
+    fun startFocus(delay: Long){
+        super.setFocusDelay(delay)
+        super.startFocusBase()
+    }
+
+    fun stopFocus(){
+        super.stopFocusBase()
+    }
+
+    fun lightOn(){
+        super.setLight(FlashMode.ON)
+    }
+
+    fun lightOff(){
+        super.setLight(FlashMode.OFF)
+    }
+
+    override fun setLight(mode: FlashMode){
+        super.setLight(mode)
+    }
+
     fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         if (requestCode == REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             Log.d("LOG", "requestCode == 777")

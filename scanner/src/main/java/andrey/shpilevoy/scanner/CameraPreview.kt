@@ -11,12 +11,20 @@ import android.widget.FrameLayout
 open class CameraPreview @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     FrameLayout(context, attrs), SurfaceHolder.Callback {
 
+    companion object{
+        private var focusDelay = 1000L
+        private var focus = true
+    }
+
     private val mCameraManager: CameraManager = CameraManager(context)
     private val mPreviewCallback: CameraScanAnalysis = CameraScanAnalysis()
     private var mSurfaceView: SurfaceView? = null
     private val mFocusCallback: Camera.AutoFocusCallback =
         Camera.AutoFocusCallback { success, camera -> postDelayed(mAutoFocusTask, 1000) }
-    private val mAutoFocusTask = Runnable { mCameraManager.autoFocus(mFocusCallback) }
+    private val mAutoFocusTask = Runnable {
+        if(focus)
+            mCameraManager.autoFocus(mFocusCallback)
+    }
 
 
     fun startPreviewBase(): Boolean {
@@ -52,7 +60,7 @@ open class CameraPreview @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     fun stopPreviewBase() {
-        removeCallbacks(mAutoFocusTask)
+        stopFocusBase()
         stopScanBase()
 
         mCameraManager.stopPreview()
@@ -85,9 +93,30 @@ open class CameraPreview @JvmOverloads constructor(context: Context, attrs: Attr
     private fun startCameraPreview(holder: SurfaceHolder) {
         try {
             mCameraManager.startPreview(holder, mPreviewCallback)
-            mCameraManager.autoFocus(mFocusCallback)
+            startFocusBase()
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    fun startFocusBase(){
+        focus = true
+        mCameraManager.autoFocus(mFocusCallback)
+    }
+
+    fun stopFocusBase(){
+        focus = false
+        removeCallbacks(mAutoFocusTask)
+    }
+
+    fun setFocusDelay(delay: Long){
+        focusDelay = delay
+    }
+
+    open fun setLight(mode: FlashMode = FlashMode.OFF){
+        when(mode){
+            FlashMode.ON -> mCameraManager.setFlashLigthOn()
+            FlashMode.OFF -> mCameraManager.setFlashLightOff()
         }
     }
 

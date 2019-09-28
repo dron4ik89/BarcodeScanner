@@ -63,6 +63,29 @@ class MainActivity : AppCompatActivity() {
             camera_view.startPreviewContinue(10000)
         }
 
+
+
+        focus_stop.onClick{
+            camera_view.stopFocus()
+        }
+
+        focus_start.onClick{
+            camera_view.startFocus()
+        }
+
+        focus_delay.onClick{
+            camera_view.startFocus(2000L)
+        }
+
+
+        flash_on.onClick{
+            camera_view.lightOn()
+        }
+
+        flash_off.onClick{
+            camera_view.lightOff()
+        }
+
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {

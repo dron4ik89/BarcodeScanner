@@ -4,6 +4,7 @@ package andrey.shpilevoy.scanner
 
 import android.content.Context
 import android.hardware.Camera
+import android.util.Log
 import android.view.SurfaceHolder
 
 import java.io.IOException
@@ -91,5 +92,42 @@ class CameraManager(context: Context) {
                 e.printStackTrace()
             }
 
+    }
+
+
+    fun setFlashLigthOn() {
+
+        Thread(Runnable {
+
+            if (mCamera != null) {
+                val parameters = mCamera!!.parameters
+
+                if (parameters != null) {
+                    val supportedFlashModes = parameters.supportedFlashModes
+
+                    if (supportedFlashModes.contains(Camera.Parameters.FLASH_MODE_TORCH)) {
+                        parameters.flashMode = Camera.Parameters.FLASH_MODE_TORCH
+                    } else if (supportedFlashModes.contains(Camera.Parameters.FLASH_MODE_ON)) {
+                        parameters.flashMode = Camera.Parameters.FLASH_MODE_ON
+                    } else mCamera = null
+
+                }
+
+                mCamera!!.parameters = parameters
+            }
+
+        }).start()
+
+
+    }
+
+    fun setFlashLightOff() {
+        Thread(Runnable {
+            if (mCamera != null) {
+                val parameters = mCamera!!.parameters
+                parameters.flashMode = Camera.Parameters.FLASH_MODE_OFF
+                mCamera!!.parameters = parameters
+            }
+        }).start()
     }
 }
