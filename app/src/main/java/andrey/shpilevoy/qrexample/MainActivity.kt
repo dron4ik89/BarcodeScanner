@@ -2,15 +2,12 @@ package andrey.shpilevoy.qrexample
 
 import andrey.shpilevoy.scanner.Result
 import andrey.shpilevoy.scanner.ScanCallback
-import android.Manifest
+import andrey.shpilevoy.scanner.ScannerFormat
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
+import org.jetbrains.anko.sdk27.coroutines.onClick
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,19 +16,52 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        status_view.text = camera_view.isScan()
+
+        //camera_view.setFormat(BarcodeFormat.EAN13)
+
         camera_view.setScanCallback(object : ScanCallback {
             override fun onScanResult(result: Result) {
-
-                camera_view.stopScan()
-
-                Handler().postDelayed({
-                    camera_view.startScan()
-                }, 1000)
-
                 content_view.text = " ${result.format.name} \n\n ${result.content} "
             }
 
         })
+
+        start_preview.onClick{
+            camera_view.startPreview()
+        }
+
+        start_scan.onClick{
+            camera_view.startScan()
+            status_view.text = camera_view.isScan()
+        }
+
+        stop_scan.onClick{
+            camera_view.stopScan()
+            status_view.text = camera_view.isScan()
+        }
+
+        stop_preview.onClick{
+            camera_view.stopPreview()
+        }
+
+
+
+        preview_format.onClick{
+            camera_view.startPreview(ScannerFormat.PREVIEW)
+        }
+
+        single_format.onClick{
+            camera_view.startPreview(ScannerFormat.SINGLE)
+        }
+
+        continue_format.onClick{
+            camera_view.startPreview(ScannerFormat.CONTINUE)
+        }
+
+        continue_format_daley.onClick{
+            camera_view.startPreviewContinue(10000)
+        }
 
     }
 
@@ -44,7 +74,7 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
 
         camera_view.startPreview()
-        camera_view.startScan()
+        //camera_view.startScan()
     }
 
     override fun onPause() {

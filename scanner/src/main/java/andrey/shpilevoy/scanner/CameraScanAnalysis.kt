@@ -13,16 +13,26 @@ import com.yanzhenjie.zbar.Config
 import com.yanzhenjie.zbar.Image
 import com.yanzhenjie.zbar.ImageScanner
 
-import java.util.ArrayList
 import java.util.concurrent.Executors
 
 internal class CameraScanAnalysis : Camera.PreviewCallback {
+
+    companion object{
+        internal var format: ScannerFormat = ScannerFormat.PREVIEW
+        internal var delay : Long = 0
+        internal var bcFormats : ArrayList<BarcodeFormat> = ArrayList()
+        init{
+            bcFormats.addAll(BarcodeFormat.ALL_FORMATS)
+        }
+    }
 
     private val executorService = Executors.newSingleThreadExecutor()
 
     private val mImageScanner: ImageScanner
     private val mHandler: Handler
     private var mCallback: ScanCallback? = null
+
+    //private var isScan = false
 
     private var allowAnalysis = true
     private var barcode: Image? = null
@@ -39,18 +49,28 @@ internal class CameraScanAnalysis : Camera.PreviewCallback {
             override fun handleMessage(msg: Message) {
                 if (mCallback != null) {
 
-                    bcs.add(msg.obj as String)
-                    Log.d("BARCODE", msg.obj as String)
-                    Log.d("BARCODE", " " + msg.arg1)
-                    Log.d("BARCODE", " " + msg.arg2)
+                    if(bcFormats.contains(BarcodeFormat.getFormat(msg.arg1))) {
 
-                    if (bcs.size >= 3 && bcs[bcs.size - 1] == bcs[bcs.size - 2]) {
-                        bcs.clear()
+                        bcs.add(msg.obj as String)
+                        //Log.d("BARCODE", msg.obj as String)
+                        //Log.d("BARCODE", " " + msg.arg1)
+                        //Log.d("BARCODE", " " + msg.arg2)
 
-                        val result = Result(msg.obj as String, BarcodeFormat.getFormatById(msg.arg1))
+                        if (bcs.size >= 3 && bcs[bcs.size - 1] == bcs[bcs.size - 2]) {
+                            bcs.clear()
 
-                        mCallback!!.onScanResult(result)
-                    } else {
+                            mCallback!!.onScanResult(Result(msg.obj as String, BarcodeFormat.getFormat(msg.arg1)))
+
+                            if (format == ScannerFormat.CONTINUE)
+                                Handler().postDelayed({
+                                onStart()
+                            }, delay)
+
+                        } else {
+                            onStart()
+                        }
+
+                    }else{
                         onStart()
                     }
                 }
@@ -59,6 +79,7 @@ internal class CameraScanAnalysis : Camera.PreviewCallback {
     }
 
     private val mAnalysisTask = Runnable {
+
         val result = mImageScanner.scanImage(barcode)
 
         var resultStr: String? = null
@@ -81,8 +102,6 @@ internal class CameraScanAnalysis : Camera.PreviewCallback {
         }
     }
 
-
-
     fun setScanCallback(callback: ScanCallback) {
         this.mCallback = callback
     }
@@ -96,6 +115,8 @@ internal class CameraScanAnalysis : Camera.PreviewCallback {
     }
 
     override fun onPreviewFrame(data: ByteArray, camera: Camera) {
+        //Log.d("onPreviewFrame", "allowAnalysis=${this.allowAnalysis}")
+
         if (allowAnalysis) {
             allowAnalysis = false
 
@@ -104,9 +125,15 @@ internal class CameraScanAnalysis : Camera.PreviewCallback {
             barcode = Image(size.width, size.height, "Y800")
             barcode!!.data = data
 
-            barcode!!.setCrop(size.width / 3, 0, size.width / 3, size.height)
+            barcode!!.setCrop(0, 0, size.width, size.height)
 
             executorService.execute(mAnalysisTask)
+
         }
+
+    }
+
+    fun isAnalysis(): String {
+        return "${this.allowAnalysis}"
     }
 }

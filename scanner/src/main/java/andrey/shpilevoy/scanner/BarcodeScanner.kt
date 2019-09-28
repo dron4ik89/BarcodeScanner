@@ -1,173 +1,88 @@
-@file:Suppress("DEPRECATION")
-
 package andrey.shpilevoy.scanner
 
 import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.Color
-import android.hardware.Camera
+import android.os.Handler
 import android.util.AttributeSet
 import android.util.Log
-import android.util.TypedValue
-import android.view.*
-import android.widget.Button
-import android.widget.FrameLayout
-import android.widget.TextView
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 
 class BarcodeScanner @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
-    FrameLayout(context, attrs), SurfaceHolder.Callback {
+    CameraPreview(context, attrs) {
 
+    private val REQUEST_CODE = 777
 
-    init{
+    fun startPreview() {
 
+        stopScan()
 
-        View.inflate(context, R.layout.splash, this)
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(context as Activity, arrayOf<String>(Manifest.permission.CAMERA),
+                REQUEST_CODE
+            )
+        } else {
+            super.startPreviewBase()
+        }
+    }
 
+    fun startPreview(format: ScannerFormat) {
+
+        startPreview()
+        if(format != ScannerFormat.PREVIEW)
+            startScan()
+        CameraScanAnalysis.format = format
 
     }
 
+    fun startPreviewContinue(delay: Long){
+        startPreview()
+        startScan()
 
-
-    private val REQUEST_CODE = 77763
-
-    private val mCameraManager: CameraManager = CameraManager(context)
-    private val mPreviewCallback: CameraScanAnalysis = CameraScanAnalysis()
-    private var mSurfaceView: SurfaceView? = null
-    private val mFocusCallback: Camera.AutoFocusCallback =
-        Camera.AutoFocusCallback { success, camera -> postDelayed(mAutoFocusTask, 1000) }
-    private val mAutoFocusTask = Runnable { mCameraManager.autoFocus(mFocusCallback) }
-
-
-
-
-
-    fun startPreview(): Boolean {
-
-/*
-        val mTextView = Button(context)
-        addView(
-            mTextView,
-            LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER)
-        )
-
-
-        mTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14F);
-        mTextView.text = "Not work"
-        mTextView.setTextColor(Color.BLACK)
-*/
-
-        /*
-
-
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(context as Activity, arrayOf<String>(Manifest.permission.CAMERA), REQUEST_CODE)
-
-
-
-        } else {
-
-            try {
-                mCameraManager.openDriver()
-            } catch (e: Exception) {
-                return false
-            }
-
-            if (mSurfaceView == null) {
-                mSurfaceView = SurfaceView(context)
-                addView(
-                    mSurfaceView,
-                    LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-                )
-                val holder = mSurfaceView!!.holder
-                holder.addCallback(this)
-                holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS)
-            }
-
-            startCameraPreview(mSurfaceView!!.holder)
-
-        }*/
-
-        return true
+        CameraScanAnalysis.format = ScannerFormat.CONTINUE
+        CameraScanAnalysis.delay = delay
     }
 
     fun startScan() {
-        mPreviewCallback.onStart()
+        super.startScanBase()
     }
 
     fun stopScan() {
-        mPreviewCallback.onStop()
+        super.stopScanBase()
     }
 
     fun stopPreview() {
-        removeCallbacks(mAutoFocusTask)
-        stopScan()
-
-        mCameraManager.stopPreview()
-        mCameraManager.closeDriver()
+        super.stopPreviewBase()
     }
 
     fun setScanCallback(callback: ScanCallback) {
-        mPreviewCallback.setScanCallback(callback)
+        super.setScanCallbackBase(callback)
+    }
+
+    fun setFormat(format: BarcodeFormat){
+        CameraScanAnalysis.bcFormats.clear()
+        CameraScanAnalysis.bcFormats.add(format)
+    }
+
+    fun setFormats(formats: Array<BarcodeFormat>){
+        CameraScanAnalysis.bcFormats.clear()
+        CameraScanAnalysis.bcFormats.addAll(formats)
+    }
+
+    fun setFormats(formats: ArrayList<BarcodeFormat>){
+        CameraScanAnalysis.bcFormats.clear()
+        CameraScanAnalysis.bcFormats.addAll(formats)
     }
 
     fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         if (requestCode == REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
             Log.d("LOG", "requestCode == 777")
-
-            startPreview()
+            startPreviewBase()
         } else {
-
             Log.d("LOG", "requestCode != 777")
-
-
-
-
-
         }
-    }
-
-    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        val actualPreviewWidth = resources.displayMetrics.widthPixels
-        val actualPreviewHeight = resources.displayMetrics.heightPixels
-
-        val left = (actualPreviewWidth - width) / 2
-        val top = (actualPreviewHeight - height) / 2
-        val right = actualPreviewWidth - left
-        val bottom = actualPreviewHeight - top
-
-        if (mSurfaceView != null) {
-            mSurfaceView!!.layout(-left, -top, right, bottom)
-        }
-
-    }
-
-    private fun startCameraPreview(holder: SurfaceHolder) {
-        try {
-            mCameraManager.startPreview(holder, mPreviewCallback)
-            mCameraManager.autoFocus(mFocusCallback)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    override fun surfaceCreated(holder: SurfaceHolder) {}
-
-    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-        if (holder.surface == null) {
-            return
-        }
-        mCameraManager.stopPreview()
-        startCameraPreview(holder)
-    }
-
-    override fun surfaceDestroyed(holder: SurfaceHolder) {}
-
-    override fun onDetachedFromWindow() {
-        stopPreview()
-        super.onDetachedFromWindow()
     }
 
 }

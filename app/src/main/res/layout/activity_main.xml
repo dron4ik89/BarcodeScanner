@@ -37,19 +37,69 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
 
-                <RelativeLayout
+                <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1">
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_margin="5dp">
 
-                    <TextView
-                            android:id="@+id/content_view"
-                            android:layout_width="wrap_content"
+                    <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_centerInParent="true"
-                            android:gravity="center"/>
+                            android:orientation="horizontal">
 
-                </RelativeLayout>
+                        <Button
+                                android:id="@+id/preview_format"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="preview"/>
+
+                        <Button
+                                android:id="@+id/single_format"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="single"/>
+
+                        <Button
+                                android:id="@+id/continue_format"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="continue"/>
+
+                        <Button
+                                android:id="@+id/continue_format_daley"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="daley"/>
+
+                    </LinearLayout>
+
+                    <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1">
+
+                        <TextView
+                                android:id="@+id/status_view"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="false"/>
+
+                        <TextView
+                                android:id="@+id/content_view"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:gravity="center"/>
+
+                    </RelativeLayout>
+
+                </LinearLayout>
 
                 <LinearLayout
                         android:layout_width="match_parent"
@@ -104,6 +154,5 @@
         </LinearLayout>
 
     </LinearLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -26,7 +26,6 @@ class BarcodeFormat(val id: Int, val name: String) {
         val CODE128 = BarcodeFormat(Symbol.CODE128, "CODE128")
 
         val ALL_FORMATS: MutableList<BarcodeFormat> = ArrayList()
-
         init {
             ALL_FORMATS.add(PARTIAL)
             ALL_FORMATS.add(EAN8)
@@ -46,9 +45,18 @@ class BarcodeFormat(val id: Int, val name: String) {
             ALL_FORMATS.add(CODE128)
         }
 
-        fun getFormatById(id: Int): BarcodeFormat {
+        fun getFormat(id: Int): BarcodeFormat {
             for (format in ALL_FORMATS) {
                 if (format.id == id) {
+                    return format
+                }
+            }
+            return NONE
+        }
+
+        fun parse(name: String): BarcodeFormat {
+            for (format in ALL_FORMATS) {
+                if (format.name.equals(name)) {
                     return format
                 }
             }
