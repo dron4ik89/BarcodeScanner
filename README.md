@@ -10,7 +10,7 @@ allprojects {
 
 ``` 
 dependencies {
-  implementation 'com.github.dron4ik89:BarcodeScanner:0.0.1' 
+  implementation 'com.github.dron4ik89:BarcodeScanner:0.0.2' 
 }
 ```
 
